@@ -177,9 +177,40 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        alpha = -sys.maxint -1
+        beta = sys.maxint
+        move = self.minimax(gameState, self.depth, self.index, alpha, beta)
+        return move[0]
 
+    def minimax(self, gameState, depth, agentIndex, alpha, beta):
+        legalMoves = gameState.getLegalActions(agentIndex)
+        if (depth == 0 or legalMoves == []):
+            return ("Leaf", self.evaluationFunction(gameState))
+        if (agentIndex == 0):
+            bestMove = ("Nothing", -(sys.maxint - 1))
+            for move in legalMoves:
+                successorState = gameState.generateSuccessor(agentIndex, move)
+                val = self.minimax(successorState, depth, agentIndex + 1, alpha, beta)
+                if (val[1] > bestMove[1]):
+                    bestMove = (move, val[1])
+                if (val[1] > beta):
+                    return bestMove
+                alpha = max(alpha, val[1])
+            return bestMove
+        elif (agentIndex < gameState.getNumAgents()):
+            bestMove = ("Nothing", sys.maxint)
+            for move in legalMoves:
+                successorState = gameState.generateSuccessor(agentIndex, move)
+                if (agentIndex + 1 >= gameState.getNumAgents()):
+                    val = self.minimax(successorState, depth - 1, 0, alpha, beta)
+                else:
+                    val = self.minimax(successorState, depth, agentIndex + 1, alpha, beta)
+                if (val[1] < bestMove[1]):
+                    bestMove = (move, val[1])
+                if (val[1] < alpha):
+                    return bestMove
+                beta = min(beta, val[1])
+            return bestMove
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
@@ -192,9 +223,32 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        move = self.expectimax(gameState, self.depth, self.index)
+        return move[0]
 
+    def expectimax(self, gameState, depth, agentIndex):
+        legalMoves = gameState.getLegalActions(agentIndex)
+        if (depth == 0 or legalMoves == []):
+            return ("Leaf", self.evaluationFunction(gameState))
+        if (agentIndex == 0):
+            bestMove = ("Nothing", (-sys.maxint -1) * 1.0)
+            for move in legalMoves:
+                successorState = gameState.generateSuccessor(agentIndex, move)
+                val = self.expectimax(successorState, depth, agentIndex + 1)
+                if (val[1] > bestMove[1]):
+                    bestMove = (move, val[1])
+            return bestMove
+        elif (agentIndex < gameState.getNumAgents()):
+            bestMove = ("Nothing", 0.0)
+            for move in legalMoves:
+                successorState = gameState.generateSuccessor(agentIndex, move)
+                if (agentIndex + 1 >= gameState.getNumAgents()):
+                    val = self.expectimax(successorState, depth - 1, 0)
+                else:
+                    val = self.expectimax(successorState, depth, agentIndex + 1)
+                p = 1.0 / (len(legalMoves) * 1.0)
+                bestMove = (bestMove[0], bestMove[1] + (p * val[1]))
+            return bestMove
 def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
