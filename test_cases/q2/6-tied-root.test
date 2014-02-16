@@ -1,7 +1,6 @@
 class: "GraphGameTreeTest"
 alg: "MinimaxAgent"
 depth: "3"
-
 diagram: """
     max
    /   \
