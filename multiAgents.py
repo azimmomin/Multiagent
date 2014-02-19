@@ -256,9 +256,52 @@ def betterEvaluationFunction(currentGameState):
 
       DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Check if game is over
+    if currentGameState.isWin():
+        return float("inf")
+    if currentGameState.isLose():
+        return -float("inf")
+    
+    score = scoreEvaluationFunction(currentGameState)
+    foodGrid = currentGameState.getFood()
+    foodList = foodGrid.asList()
+    ghostList = currentGameState.getGhostPositions()
+    foodDist = float("inf")
+    ghostDist = float("inf")
+    pacPos = currentGameState.getPacmanPosition()
+    capsules = currentGameState.getCapsules()
+    ghostStates = currentGameState.getGhostStates()
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+    scaredSum = 0;
 
+    # Get sum of scared times
+    for sTime in scaredTimes:
+        scaredSum += sTime
+
+    # Get manhattan distace between pacman and each food pellet. Keep smallest distance.
+    for food in foodList:
+        fD = manhattanDistance(pacPos, food)
+        if (fD < foodDist):
+            foodDist = fD
+
+    # Get manhattan distace between pacman and each ghost. Keep smallest distance.
+    for ghost in ghostList:
+        gD = manhattanDistance(pacPos, ghost)
+        if (gD < ghostDist):
+            ghostDist = gD
+
+    # Assign scores with the values calculated above multiplied by arbitrary weights.
+    score += max(ghostDist, 4) * 2
+    score -= foodDist * 2.5
+    score -= 4 * len(foodList)
+
+    if (scaredSum == 0):
+        score -= 3.5 * len(capsules)
+    else:
+        score += scaredSum
+
+    return score
+        
 # Abbreviation
 better = betterEvaluationFunction
 
